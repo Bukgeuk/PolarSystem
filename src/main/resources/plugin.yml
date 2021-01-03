@@ -1,0 +1,22 @@
+name: PolarSystem
+main: dev.bukgeuk.polarsystem.PolarSystem
+author: Bukgeuk_
+description: Basic System of PolarServer
+version: 1.0
+api-version: 1.16
+
+commands:
+  guild:
+    aliases: g
+    description: Guild Command
+    usage: "사용법: /<command> [ list | create | remove | info | description | join | leave | request | kick ]"
+  gchat:
+    aliases: gc
+    description: Send message to guild members
+    usage: "사용법: /<command> <message>"
+  PolarSystemGuildRemoveAccept:
+  PolarSystemGuildRemoveDeny:
+  PolarSystemGuildLeaveAccept:
+  PolarSystemGuildLeaveDeny:
+  PolarSystemGuildKickAccept:
+  PolarSystemGuildKickDeny:
