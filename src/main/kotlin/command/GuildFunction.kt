@@ -112,7 +112,7 @@ class GuildMember: Listener {
 
     @EventHandler
     fun onInventoryClick(e: InventoryClickEvent) {
-        val id = GuildBase.PlayerToGuildId[e.whoClicked.uniqueId]
+        val id = GuildBase.PlayerToGuildId[e.whoClicked.uniqueId] ?: return
         if (e.view.title == "길드: ${ChatColor.GOLD}${ColoredChat().hexToColor(GuildBase.Guilds[id]!!.name)}") e.isCancelled = true
     }
 }
