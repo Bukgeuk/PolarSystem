@@ -1,0 +1,44 @@
+name: PolarSystem
+main: dev.bukgeuk.polarsystem.PolarSystem
+author: Bukgeuk_
+description: Basic System of PolarServer
+version: 2.0.0
+api-version: 1.17
+
+commands:
+  guild:
+    aliases: g
+    description: Guild Command
+    usage: "사용법: /<command> [ list | create | remove | info | description | join | leave | request | kick ]"
+    permission: polarsystem.guild
+    permission-message: "You do not have permission!"
+  gchat:
+    aliases: gc
+    description: Send message to guild members
+    usage: "사용법: /<command> <message>"
+    permission: polarsystem.guildchat
+    permission-message: "You do not have permission!"
+  PolarSystemGuildRemoveAccept:
+    permission: polarsystem.guild
+  PolarSystemGuildRemoveDeny:
+    permission: polarsystem.guild
+  PolarSystemGuildLeaveAccept:
+    permission: polarsystem.guild
+  PolarSystemGuildLeaveDeny:
+    permission: polarsystem.guild
+  PolarSystemGuildKickAccept:
+    permission: polarsystem.guild
+  PolarSystemGuildKickDeny:
+    permission: polarsystem.guild
+
+permissions:
+  polarsystem.*:
+    description: Allows all PolarSystem command
+    default: op
+    children:
+      polarsystem.guild: true
+      polarsystem.guildchat: true
+  polarsystem.guild:
+    default: true
+  polarsystem.guildchat:
+    default: true
