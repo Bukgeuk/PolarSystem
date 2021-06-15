@@ -73,7 +73,7 @@ class KickExpirationTimer {
     }
 }
 
-class GuildJoin(private val dataFolder: String) {
+class GuildJoin(private val dataFolder: String, private val limit: Int) {
     fun onCommand(sender: Player, args: Array<out String>) {
         if (GuildBase.PlayerToGuildId[sender.uniqueId] == null) {
             if (args.isNotEmpty()) {
@@ -87,6 +87,9 @@ class GuildJoin(private val dataFolder: String) {
 
                 if (GuildBase.Guilds[id] == null) {
                     sender.sendMessage("${Color.GRAY}[PolarSystem] ${ChatColor.RESET}길드를 찾을 수 없습니다")
+                    return
+                } else if (GuildBase.Guilds[id]?.members?.size!! >= limit) {
+                    sender.sendMessage("${Color.GRAY}[PolarSystem] ${ChatColor.RESET}해당 길드의 멤버 수가 최대입니다")
                     return
                 }
 

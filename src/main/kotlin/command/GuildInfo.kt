@@ -7,7 +7,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.lang.NumberFormatException
 
-class GuildInfo {
+class GuildInfo(private val limit: Int) {
     fun onCommand(sender: Player, args: Array<out String>) {
         val id = if (args.isEmpty()) {
             if (GuildBase.PlayerToGuildId[sender.uniqueId] == null) {
@@ -39,8 +39,9 @@ class GuildInfo {
         sender.sendMessage("")
         sender.sendMessage("  - ID: ${guild.id}")
         sender.sendMessage("  - 길드장: ${(lp ?: Bukkit.getOfflinePlayer(guild.leader)).name}")
-        sender.sendMessage("  - 멤버: ${members.joinToString(", ")}")
         sender.sendMessage("  - 설명: ${ColoredChat().hexToColor(guild.description)}")
+        sender.sendMessage("  - 멤버 수: ${members.size}/${limit}")
+        sender.sendMessage("  - 멤버: ${members.joinToString(", ")}")
     }
 }
 

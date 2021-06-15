@@ -20,7 +20,7 @@ data class Guild(
     var description: String
 )
 
-class GuildBase(private val requireLevel: Int): CommandExecutor {
+class GuildBase(private val requireLevel: Int, private val memberLimit: Int): CommandExecutor {
     companion object {
         @JvmField var PlayerToGuildId: MutableMap<UUID, Int> = mutableMapOf()
         @JvmField var Guilds: MutableMap<Int, Guild> = mutableMapOf()
@@ -58,9 +58,9 @@ class GuildBase(private val requireLevel: Int): CommandExecutor {
                         args[0] == "list" || args[0] == "l" -> GuildList().onCommand(sender, _args)
                         args[0] == "create" -> GuildCreate().onCommand(sender, _args)
                         args[0] == "remove" -> GuildRemove().onCommand(sender, _args)
-                        args[0] == "info" || args[0] == "in" -> GuildInfo().onCommand(sender, _args)
+                        args[0] == "info" || args[0] == "in" -> GuildInfo(memberLimit).onCommand(sender, _args)
                         args[0] == "description" || args[0] == "des" || args[0] == "d" -> GuildDescription().onCommand(sender, _args)
-                        args[0] == "join" -> GuildJoin(dataFolder).onCommand(sender, _args)
+                        args[0] == "join" -> GuildJoin(dataFolder, memberLimit).onCommand(sender, _args)
                         args[0] == "leave" -> GuildLeave().onCommand(sender, _args)
                         args[0] == "kick" -> GuildKick().onCommand(sender, _args)
                         args[0] == "rename" || args[0] == "rn" -> GuildRename().onCommand(sender, _args)

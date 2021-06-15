@@ -30,6 +30,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.http.WebSocket
 import java.util.*
+import kotlin.math.ceil
 import kotlin.properties.Delegates
 import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
@@ -61,18 +62,22 @@ class GuildMember: Listener {
     fun onCommand(sender: Player, args: Array<out String>) {
         val id = GuildBase.PlayerToGuildId[sender.uniqueId]
         if (id != null) {
-            val inv = Bukkit.createInventory(null, 18, "길드: ${ChatColor.GOLD}${ColoredChat().hexToColor(GuildBase.Guilds[id]!!.name)}")
-            initialize(id, inv)
+            val inv = Bukkit.createInventory(null, 27, "길드: ${ChatColor.GOLD}${ColoredChat().hexToColor(GuildBase.Guilds[id]!!.name)}" +
+                    " ${ChatColor.RESET}(1/${ceil(GuildBase.Guilds[id]!!.members.size.toFloat() / 9).toInt()})")
+            initialize(id, inv, 0)
             sender.openInventory(inv)
             return
         }
         sender.sendMessage("${Color.GRAY}[PolarSystem] ${ChatColor.RESET}길드에 가입되어 있지 않습니다")
     }
 
-    private fun initialize(id: Int, inv: Inventory) {
+    private fun initialize(id: Int, inv: Inventory, page: Int) {
         val members = GuildBase.Guilds[id]!!.members
-        for (i in 0 until 5) {
+
+        for (idx in 0 until 9) {
+            val i = page * 9 + idx
             if (members.size <= i) break
+
             val head = ItemStack(Material.PLAYER_HEAD, 1)
             val meta: SkullMeta = head.itemMeta as SkullMeta
             val ofp = Bukkit.getOfflinePlayer(members[i])
@@ -82,7 +87,7 @@ class GuildMember: Listener {
             else meta.setDisplayName("${ChatColor.DARK_AQUA}${ofp.name}")
 
             head.itemMeta = meta
-            inv.setItem(2 + i, head)
+            inv.setItem(idx, head)
 
             val p = Bukkit.getPlayer(members[i])
             val status: ItemStack
@@ -106,14 +111,54 @@ class GuildMember: Listener {
                 status.itemMeta = smeta
             }
 
-            inv.setItem(11 + i, status)
+            inv.setItem(9 + idx, status)
+
+            // ui
+            if (page > 0) {
+                val item = ItemStack(Material.ARROW, 1)
+                val imeta = item.itemMeta
+                imeta?.setDisplayName("${ChatColor.GREEN}이전 페이지")
+                imeta?.lore = mutableListOf("${ChatColor.YELLOW}${page} 페이지")
+                item.itemMeta = imeta
+
+                inv.setItem(21, item)
+            }
+            if (page < ceil(GuildBase.Guilds[id]!!.members.size.toFloat() / 9).toInt() - 1) {
+                val item = ItemStack(Material.ARROW, 1)
+                val imeta = item.itemMeta
+                imeta?.setDisplayName("${ChatColor.GREEN}다음 페이지")
+                imeta?.lore = mutableListOf("${ChatColor.YELLOW}${page + 2} 페이지")
+                item.itemMeta = imeta
+
+                inv.setItem(23, item)
+            }
         }
     }
 
     @EventHandler
     fun onInventoryClick(e: InventoryClickEvent) {
         val id = GuildBase.PlayerToGuildId[e.whoClicked.uniqueId] ?: return
-        if (e.view.title == "길드: ${ChatColor.GOLD}${ColoredChat().hexToColor(GuildBase.Guilds[id]!!.name)}") e.isCancelled = true
+        val pattern = Regex("길드: ${ChatColor.GOLD}${ColoredChat().hexToColor(GuildBase.Guilds[id]!!.name)} ${ChatColor.RESET}\\((\\d)\\/\\d\\)")
+        val res = pattern.matchEntire(e.view.title)
+        if (res != null) {
+            e.isCancelled = true
+
+            if (e.currentItem?.type == Material.ARROW) {
+                val page = when (e.currentItem?.itemMeta?.displayName) {
+                    "${ChatColor.GREEN}이전 페이지" -> {
+                        res.groupValues[1].toInt() - 2
+                    }
+                    "${ChatColor.GREEN}다음 페이지" -> {
+                        res.groupValues[1].toInt()
+                    }
+                    else -> return
+                }
+                val inv = Bukkit.createInventory(null, 27, "길드: ${ChatColor.GOLD}${ColoredChat().hexToColor(GuildBase.Guilds[id]!!.name)}" +
+                        " ${ChatColor.RESET}(${page + 1}/${ceil(GuildBase.Guilds[id]!!.members.size.toFloat() / 9).toInt()})")
+                initialize(id, inv, page)
+                e.whoClicked.openInventory(inv)
+            }
+        }
     }
 }
 
@@ -183,7 +228,7 @@ class GuildInventory: Listener {
         }
 
         private fun createInventory(): Inventory {
-            return Bukkit.createInventory(null, 36, "길드 보관함")
+            return Bukkit.createInventory(null, size, "길드 보관함")
         }
     }
 

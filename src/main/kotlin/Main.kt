@@ -17,12 +17,13 @@ class PolarSystem: JavaPlugin() {
         config.addDefault("leave-request-expiration", 60)
         config.addDefault("kick-request-expiration", 60)
         config.addDefault("inventory-size", 36)
+        config.addDefault("guild-member-limit", 5)
         config.options().copyDefaults(true)
         saveConfig()
 
         checkFolder()
 
-        getCommand("guild")?.setExecutor(GuildBase(config.getInt("require-level")))
+        getCommand("guild")?.setExecutor(GuildBase(config.getInt("require-level"), config.getInt("guild-member-limit")))
         getCommand("gchat")?.setExecutor(GuildChat())
         getCommand("PolarSystemGuildRemoveAccept")?.setExecutor(_GuildRemoveAccept())
         getCommand("PolarSystemGuildRemoveDeny")?.setExecutor(_GuildRemoveDeny())
@@ -41,7 +42,22 @@ class PolarSystem: JavaPlugin() {
         RequestExpirationTimer.expirationTime = config.getLong("remove-request-expiration")
         LeaveExpirationTimer.expirationTime = config.getLong("leave-request-expiration")
         KickExpirationTimer.expirationTime = config.getLong("kick-request-expiration")
-        GuildInventory.size = config.getInt("inventory-size")
+        var isz = config.getInt("inventory-size")
+        when {
+            isz < 9 -> {
+                isz = 9
+                logger.warning("inventory size must be larger than 9")
+            }
+            isz > 54 -> {
+                isz = 54
+                logger.warning("inventory size must be smaller 54")
+            }
+            isz % 9 != 0 -> {
+                isz -= (isz % 9)
+                logger.warning("inventory size must be a multiple of 9")
+            }
+        }
+        GuildInventory.size = isz
 
         GuildInventory.loadAll()
     }
