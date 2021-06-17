@@ -3,8 +3,12 @@ package dev.bukgeuk.polarsystem
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import dev.bukgeuk.polarsystem.command.*
+import dev.bukgeuk.polarsystem.duplication.*
 import dev.bukgeuk.polarsystem.util.Buffer
-import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
+import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
@@ -38,6 +42,8 @@ class PolarSystem: JavaPlugin() {
         server.pluginManager.registerEvents(PlayerJoinEvent(df), this)
         server.pluginManager.registerEvents(GuildMember(), this)
         server.pluginManager.registerEvents(GuildInventory(), this)
+        server.pluginManager.registerEvents(FurnaceRightClickEvent(this), this)
+        server.pluginManager.registerEvents(RemoveDuplicationTimer(), this)
 
         RequestExpirationTimer.expirationTime = config.getLong("remove-request-expiration")
         LeaveExpirationTimer.expirationTime = config.getLong("leave-request-expiration")
@@ -60,6 +66,22 @@ class PolarSystem: JavaPlugin() {
         GuildInventory.size = isz
 
         GuildInventory.loadAll()
+
+        val scheduler = server.scheduler
+        scheduler.runTaskTimer(this, DuplicationTimer.task, 0, 10)
+
+        //test
+        val i = ItemStack(Material.CLOCK)
+        val m = i.itemMeta
+        m?.setDisplayName(moduleItemDisplayName)
+        val pk = NamespacedKey(this, "period")
+        val ak = NamespacedKey(this, "amount")
+        m?.persistentDataContainer?.set(pk, PersistentDataType.LONG, 5)
+        m?.persistentDataContainer?.set(ak, PersistentDataType.INTEGER, 1)
+        i.itemMeta = m
+        for (onlinePlayer in server.onlinePlayers) {
+            onlinePlayer.inventory.addItem(i)
+        }
     }
 
     override fun onDisable() {
